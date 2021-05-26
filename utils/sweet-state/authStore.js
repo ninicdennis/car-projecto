@@ -5,11 +5,12 @@ const Store = createStore({
 		user: null,
 	},
 	actions: {
-		login: (user, session) => ({ setState }) => {
+		login: (user, session, data) => ({ setState }) => {
 			console.log('Signing in: ', user);
 			setState({
 				user,
 				session,
+				data,
 			});
 		},
 		name: 'auth',

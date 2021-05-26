@@ -1,10 +1,29 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { Routes } from './routes';
-import { AppBar, Button, Typography } from '@material-ui/core';
+import { AppBar, Button, Container, Typography } from '@material-ui/core';
 import { useAuth } from '../utils/sweet-state/authStore';
+
+import { supabase } from '../utils/initSupabase';
 export default function Home() {
-	const [state] = useAuth();
+	const [state, actions] = useAuth();
+
+	const fakeLogin = async () => {
+		const { user, session, error } = await supabase.auth.signIn({
+			email: 'foo@bar.com',
+			password: 'tester',
+		});
+		if (error) {
+			setErr({ msg: error.message, error: true });
+		} else {
+			const { data, error } = await supabase.from('users').select().filter('user_id', 'eq', user.id);
+			if (error) {
+				setErr({ error: true, msg: 'Something went wrong. Please try again.' });
+			} else {
+				actions.login(user, session, data[0]);
+			}
+		}
+	};
 	return (
 		<>
 			<Head>
@@ -17,6 +36,7 @@ export default function Home() {
 				style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', padding: 10, alignItems: 'center' }}
 			>
 				<Button onClick={e => console.log(state)}>State</Button>
+				<Button onClick={fakeLogin}>Instant Login</Button>
 				<Typography variant='h5'>Car Projecto</Typography>
 				<div>
 					{!state.user ? (
@@ -29,11 +49,13 @@ export default function Home() {
 							</Link>
 						</>
 					) : (
-						<>
-							<Link href='/profile'>
+						<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+							<Typography>Welcome, {state.data.username}</Typography>
+
+							<Link href={`/profile/${state.data.username}`}>
 								<Button color='inherit'>Profile</Button>
 							</Link>
-						</>
+						</div>
 					)}
 				</div>
 			</AppBar>

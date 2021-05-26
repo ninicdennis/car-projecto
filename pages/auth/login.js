@@ -16,30 +16,38 @@ const Login = () => {
 
 	const signIn = async () => {
 		setErr({ error: false });
-		console.log(email, password);
 		const { user, session, error } = await supabase.auth.signIn({
 			email,
 			password,
 		});
-		// console.log(user, session, error);
 		if (error) {
 			setErr({ msg: error.message, error: true });
 		} else {
-			actions.login(user, session);
-			router.push('/');
+			const { data, error } = await supabase.from('users').select().filter('user_id', 'eq', user.id);
+			if (error) {
+				setErr({ error: true, msg: 'Something went wrong. Please try again.' });
+			} else {
+				actions.login(user, session, data[0]);
+				router.push('/');
+			}
 		}
 	};
 
 	return (
-		<>
-			<Typography>Log In</Typography>
-			<Container maxWidth='sm' style={{ display: 'flex', flexDirection: 'column' }}>
-				{err.error ? err.msg : null}
-				<TextField id='standard-basic' label='username' onChange={e => setEmail(e.target.value)} />
-				<TextField id='standard-basic' label='password' onChange={e => setPassword(e.target.value)} />
-				<Button onClick={signIn}>Sign In!</Button>
+		<Container maxWidth='lg' style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+			<Container
+				maxWidth='sm'
+				style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundColor: '#c3c3c3', height: '40vh' }}
+			>
+				<Typography variant='h6'>Log In</Typography>
+				<Typography style={{ color: 'red' }}>{err.error ? err.msg : null}</Typography>
+				<TextField id='standard-basic' label='email' onChange={e => setEmail(e.target.value)} />
+				<TextField id='standard-basic' label='password' type='password' onChange={e => setPassword(e.target.value)} />
+				<Button variant='contained' style={{ marginTop: 20 }} onClick={signIn}>
+					Sign In!
+				</Button>
 			</Container>
-		</>
+		</Container>
 	);
 };
 
