@@ -2,7 +2,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { Routes } from './routes';
 import { AppBar, Button, Typography } from '@material-ui/core';
+import { useAuth } from '../utils/sweet-state/authStore';
 export default function Home() {
+	const [state] = useAuth();
 	return (
 		<>
 			<Head>
@@ -14,14 +16,25 @@ export default function Home() {
 				position='sticky'
 				style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', padding: 10, alignItems: 'center' }}
 			>
+				<Button onClick={e => console.log(state)}>State</Button>
 				<Typography variant='h5'>Car Projecto</Typography>
 				<div>
-					<Link href='/auth/signUp'>
-						<Button color='inherit'>Sign Up</Button>
-					</Link>
-					<Link href='/auth/login'>
-						<Button color='inherit'>Login</Button>
-					</Link>
+					{!state.user ? (
+						<>
+							<Link href='/auth/signUp'>
+								<Button color='inherit'>Sign Up</Button>
+							</Link>
+							<Link href='/auth/login'>
+								<Button color='inherit'>Login</Button>
+							</Link>
+						</>
+					) : (
+						<>
+							<Link href='/profile'>
+								<Button color='inherit'>Profile</Button>
+							</Link>
+						</>
+					)}
 				</div>
 			</AppBar>
 			<Routes />
